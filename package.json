@@ -1,6 +1,6 @@
 {
   "name": "@mithraic-labs/spl-governance",
-  "version": "0.0.1-beta.2",
+  "version": "0.0.1-beta.4",
   "description": "SPL Governance Anchor IDL and program",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
