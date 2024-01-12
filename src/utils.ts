@@ -55,24 +55,29 @@ export const getInstructionDataFromInstruction = (
  * @param realmKey
  * @param governanceKey
  * @param proposalName
+ * @param councilVote
  * @returns
  */
 export const createProposalTx = async (
   governanceProgram: Program<typeof SPL_GOVERNANCE_IDL>,
   realmKey: Address,
   governanceKey: Address,
-  proposalName: string
+  proposalName: string,
+  councilVote = false
 ) => {
   const realm = await governanceProgram.account.realmV2.fetch(realmKey);
   if (!realm) {
     throw new Error("Could not fetch Realm V2 account");
   }
   const proposalSeed = new web3.Keypair().publicKey;
+  const governingTokenMint = councilVote
+    ? realm.config.councilMint
+    : realm.communityMint;
   const [proposalAddress] = web3.PublicKey.findProgramAddressSync(
     [
       Buffer.from(GOVERNANCE_PROGRAM_SEED),
       new web3.PublicKey(governanceKey).toBuffer(),
-      realm.communityMint.toBuffer(),
+      governingTokenMint.toBuffer(),
       proposalSeed.toBuffer(),
     ],
     GOVERNANCE_PROGRAM_ID
@@ -81,7 +86,7 @@ export const createProposalTx = async (
     [
       Buffer.from(GOVERNANCE_PROGRAM_SEED),
       new web3.PublicKey(realmKey).toBuffer(),
-      realm.communityMint.toBuffer(),
+      governingTokenMint.toBuffer(),
       governanceProgram.provider.publicKey.toBuffer(),
     ],
     GOVERNANCE_PROGRAM_ID
@@ -116,7 +121,7 @@ export const createProposalTx = async (
       proposalOwnerRecord: proposalOwnerRecordKey,
       governanceAuthority: governanceProgram.provider.publicKey,
       payer: governanceProgram.provider.publicKey,
-      governingTokenMint: realm.communityMint,
+      governingTokenMint,
       systemProgram: web3.SystemProgram.programId,
       realmConfigAddress,
       proposalDepositAddress,
@@ -217,6 +222,7 @@ export const createProposalSignOffTx = async (
  * @param governanceKey
  * @param proposalName
  * @param instructions
+ * @param councilVote
  * @returns
  */
 export const createProposalWithInstructionsTransactions = async (
@@ -224,18 +230,22 @@ export const createProposalWithInstructionsTransactions = async (
   realmKey: Address,
   governanceKey: Address,
   proposalName: string,
-  instructions: web3.TransactionInstruction[]
+  instructions: web3.TransactionInstruction[],
+  councilVote = false,
 ) => {
   const realm = await governanceProgram.account.realmV2.fetch(realmKey);
   if (!realm) {
     throw new Error("Could not fetch Realm V2 account");
   }
   const proposalSeed = new web3.Keypair().publicKey;
+  const governingTokenMint = councilVote
+    ? realm.config.councilMint
+    : realm.communityMint;
   const [proposalAddress] = web3.PublicKey.findProgramAddressSync(
     [
       Buffer.from(GOVERNANCE_PROGRAM_SEED),
       new web3.PublicKey(governanceKey).toBuffer(),
-      realm.communityMint.toBuffer(),
+      governingTokenMint.toBuffer(),
       proposalSeed.toBuffer(),
     ],
     GOVERNANCE_PROGRAM_ID
@@ -244,7 +254,7 @@ export const createProposalWithInstructionsTransactions = async (
     [
       Buffer.from(GOVERNANCE_PROGRAM_SEED),
       new web3.PublicKey(realmKey).toBuffer(),
-      realm.communityMint.toBuffer(),
+      governingTokenMint.toBuffer(),
       governanceProgram.provider.publicKey.toBuffer(),
     ],
     GOVERNANCE_PROGRAM_ID
@@ -297,7 +307,7 @@ export const createProposalWithInstructionsTransactions = async (
         proposalOwnerRecord: proposalOwnerRecordKey,
         governanceAuthority: governanceProgram.provider.publicKey,
         payer: governanceProgram.provider.publicKey,
-        governingTokenMint: realm.communityMint,
+        governingTokenMint,
         systemProgram: web3.SystemProgram.programId,
         realmConfigAddress,
         proposalDepositAddress,
