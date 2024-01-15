@@ -113,8 +113,8 @@ function encodeCreateRealm({ name, configArgs }: any): Buffer {
             return 1 + 8;
         }
       })() +
-      1 +
-      1
+      3 +
+      3
   );
 }
 
@@ -609,6 +609,31 @@ function encodeCreateNativeTreasury({}: any): Buffer {
   return encodeData({ createNativeTreasury: {} }, 1);
 }
 
+const createMintMaxVoteWeightSourceUnion = (p: string) => {
+  const U = B.union(B.u8("discriminator"), null, p);
+  U.addVariant(0, B.seq(B.u64(), 1), "supplyFraction");
+  U.addVariant(1, B.seq(B.u64(), 1), "absolute");
+  return U;
+};
+
+const createGoverningTokenTypeUnion = (p: string) => {
+  const U = B.union(B.u8("discriminator"), null, p);
+  U.addVariant(0, B.struct([]), "liquid");
+  U.addVariant(1, B.struct([]), "membership");
+  U.addVariant(2, B.struct([]), "dormant");
+  return U;
+};
+
+const createGoverningTokenConfigArgsStruct = (p: string) =>
+  B.struct(
+    [
+      B.bool("useVoterWeightAddin"),
+      B.bool("useMaxVoterWeightAddin"),
+      createGoverningTokenTypeUnion("tokenType"),
+    ],
+    p
+  );
+
 const LAYOUT = B.union(B.u8("instruction"));
 LAYOUT.addVariant(
   0,
@@ -618,14 +643,9 @@ LAYOUT.addVariant(
       [
         B.bool("useCouncilMint"),
         B.u64("minCommunityWeightToCreateGovernance"),
-        ((p: string) => {
-          const U = B.union(B.u8("discriminator"), null, p);
-          U.addVariant(0, B.seq(B.u64(), 1), "supplyFraction");
-          U.addVariant(1, B.seq(B.u64(), 1), "absolute");
-          return U;
-        })("communityMintMaxVoteWeightSource"),
-        B.bool("useCommunityVoterWeightAddin"),
-        B.bool("useMaxCommunityVoterWeightAddin"),
+        createMintMaxVoteWeightSourceUnion("communityMintMaxVoteWeightSource"),
+        createGoverningTokenConfigArgsStruct("communityTokenConfigArgs"),
+        createGoverningTokenConfigArgsStruct("councilTokenConfigArgs"),
       ],
       "configArgs"
     ),
@@ -949,12 +969,7 @@ LAYOUT.addVariant(
       [
         B.bool("useCouncilMint"),
         B.u64("minCommunityWeightToCreateGovernance"),
-        ((p: string) => {
-          const U = B.union(B.u8("discriminator"), null, p);
-          U.addVariant(0, B.seq(B.u64(), 1), "supplyFraction");
-          U.addVariant(1, B.seq(B.u64(), 1), "absolute");
-          return U;
-        })("communityMintMaxVoteWeightSource"),
+        createMintMaxVoteWeightSourceUnion("communityMintMaxVoteWeightSource"),
         B.bool("useCommunityVoterWeightAddin"),
         B.bool("useMaxCommunityVoterWeightAddin"),
       ],
