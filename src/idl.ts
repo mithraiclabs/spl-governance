@@ -1947,12 +1947,16 @@ type SplGovernance = {
             };
           },
           {
-            name: "useCommunityVoterWeightAddin";
-            type: "bool";
+            name: "communityTokenConfigArgs";
+            type: {
+              defined: "GoverningTokenConfigArgs";
+            };
           },
           {
-            name: "useMaxCommunityVoterWeightAddin";
-            type: "bool";
+            name: "councilTokenConfigArgs";
+            type: {
+              defined: "GoverningTokenConfigArgs";
+            };
           }
         ];
       };
@@ -2193,6 +2197,45 @@ type SplGovernance = {
           {
             name: "Absolute";
             fields: ["u64"];
+          }
+        ];
+      };
+    },
+    {
+      name: "GoverningTokenConfigArgs";
+      type: {
+        kind: "struct";
+        fields: [
+          {
+            name: "useVoterWeightAddin";
+            type: "bool";
+          },
+          {
+            name: "useMaxVoterWeightAddin";
+            type: "bool";
+          },
+          {
+            name: "tokenType";
+            type: {
+              defined: "GoverningTokenType";
+            };
+          }
+        ];
+      };
+    },
+    {
+      name: "GoverningTokenType";
+      type: {
+        kind: "enum";
+        variants: [
+          {
+            name: "liquid";
+          },
+          {
+            name: "membership";
+          },
+          {
+            name: "dormant";
           }
         ];
       };
@@ -4927,12 +4970,16 @@ export const SPL_GOVERNANCE_IDL: SplGovernance = {
             },
           },
           {
-            name: "useCommunityVoterWeightAddin",
-            type: "bool",
+            name: "communityTokenConfigArgs",
+            type: {
+              defined: "GoverningTokenConfigArgs",
+            },
           },
           {
-            name: "useMaxCommunityVoterWeightAddin",
-            type: "bool",
+            name: "councilTokenConfigArgs",
+            type: {
+              defined: "GoverningTokenConfigArgs",
+            },
           },
         ],
       },
@@ -5173,6 +5220,45 @@ export const SPL_GOVERNANCE_IDL: SplGovernance = {
           {
             name: "Absolute",
             fields: ["u64"],
+          },
+        ],
+      },
+    },
+    {
+      name: "GoverningTokenConfigArgs",
+      type: {
+        kind: "struct",
+        fields: [
+          {
+            name: "useVoterWeightAddin",
+            type: "bool",
+          },
+          {
+            name: "useMaxVoterWeightAddin",
+            type: "bool",
+          },
+          {
+            name: "tokenType",
+            type: {
+              defined: "GoverningTokenType",
+            },
+          },
+        ],
+      },
+    },
+    {
+      name: "GoverningTokenType",
+      type: {
+        kind: "enum",
+        variants: [
+          {
+            name: "liquid",
+          },
+          {
+            name: "membership",
+          },
+          {
+            name: "dormant",
           },
         ],
       },

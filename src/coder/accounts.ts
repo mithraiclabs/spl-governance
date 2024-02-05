@@ -371,8 +371,8 @@ const REALM_V2_LAYOUT: any = B.struct([
       B.u64("minCommunityWeightToCreateGovernance"),
       ((p: string) => {
         const U = B.union(B.u8("discriminator"), null, p);
-        U.addVariant(0, B.u64(), "supplyFraction");
-        U.addVariant(1, B.u64(), "absolute");
+        U.addVariant(0, B.seq(B.u64(), 1), "supplyFraction");
+        U.addVariant(1, B.seq(B.u64(), 1), "absolute");
         return U;
       })("communityMintMaxVoteWeightSource"),
       B.option(B.publicKey(), "councilMint"),
@@ -600,8 +600,8 @@ const REALM_V1_LAYOUT: any = B.struct([
       B.u64("minCommunityWeightToCreateGovernance"),
       ((p: string) => {
         const U = B.union(B.u8("discriminator"), null, p);
-        U.addVariant(0, B.u64(), "supplyFraction");
-        U.addVariant(1, B.u64(), "absolute");
+        U.addVariant(0, B.seq(B.u64(), 1), "supplyFraction");
+        U.addVariant(1, B.seq(B.u64(), 1), "absolute");
         return U;
       })("communityMintMaxVoteWeightSource"),
       B.option(B.publicKey(), "councilMint"),
