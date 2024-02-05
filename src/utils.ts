@@ -231,7 +231,7 @@ export const createProposalWithInstructionsTransactions = async (
   governanceKey: Address,
   proposalName: string,
   instructions: web3.TransactionInstruction[],
-  councilVote = false,
+  councilVote = false
 ) => {
   const realm = await governanceProgram.account.realmV2.fetch(realmKey);
   if (!realm) {
