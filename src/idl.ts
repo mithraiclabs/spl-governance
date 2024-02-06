@@ -337,12 +337,6 @@ type SplGovernance = {
           isMut: false;
           isSigner: false;
         },
-        // NOTE: this IDL doesn not include `VoterWeightRecord` or `MaxVoterWeightRecord` accounts.
-        {
-          name: "proposalDepositAddress";
-          isMut: true;
-          isSigner: false;
-        }
       ];
       args: [
         {
@@ -3378,12 +3372,6 @@ export const SPL_GOVERNANCE_IDL: SplGovernance = {
         {
           name: "realmConfigAddress",
           isMut: false,
-          isSigner: false,
-        },
-        // NOTE: this IDL doesn not include `VoterWeightRecord` or `MaxVoterWeightRecord` accounts.
-        {
-          name: "proposalDepositAddress",
-          isMut: true,
           isSigner: false,
         },
       ],
