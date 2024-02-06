@@ -97,24 +97,59 @@ export class SplGovernanceInstructionCoder implements InstructionCoder {
   }
 }
 
+const getSpanOfString = (val: string) => 4 + val.length;
+
+const getSpanOfGoverningTokenConfigArgs = () => 3;
+
+const getSpanOfMintMaxVoteWeightSource = (val: Record<string, unknown>) => {
+  switch (Object.keys(val)[0]) {
+    case "supplyFraction":
+      return 1 + 8;
+    case "absolute":
+      return 1 + 8;
+    default:
+      return 0;
+  }
+};
+
+const getSpanOfVoteThreshold = (val: Record<string, unknown>) => {
+  switch (Object.keys(val)[0]) {
+    case "yesVotePercentage":
+      return 1 + 1;
+    case "quorumPercentage":
+      return 1 + 1;
+    case "disabled":
+      return 1;
+    default:
+      return 0;
+  }
+};
+
+const getSpanOfVoteTipping = (val: Record<string, unknown>) => {
+  switch (Object.keys(val)[0]) {
+    case "strict":
+      return 1;
+    case "early":
+      return 1;
+    case "disabled":
+      return 1;
+    default:
+      return 0;
+  }
+};
+
 function encodeCreateRealm({ name, configArgs }: any): Buffer {
   return encodeData(
     { createRealm: { name, configArgs } },
     1 +
-      4 +
-      name.length +
-      1 +
-      8 +
-      (() => {
-        switch (Object.keys(configArgs.communityMintMaxVoteWeightSource)[0]) {
-          case "supplyFraction":
-            return 1 + 8;
-          case "absolute":
-            return 1 + 8;
-        }
-      })() +
-      3 +
-      3
+      getSpanOfString(name) +
+      B.bool("useCouncilMint").span +
+      B.u64("minCommunityWeightToCreateGovernance").span +
+      getSpanOfMintMaxVoteWeightSource(
+        configArgs.communityMintMaxVoteWeightSource
+      ) +
+      getSpanOfGoverningTokenConfigArgs("communityTokenConfigArgs") +
+      getSpanOfGoverningTokenConfigArgs("councilTokenConfigArgs")
   );
 }
 
@@ -375,59 +410,19 @@ function encodeCreateMintGovernance({
   return encodeData(
     { createMintGovernance: { config, transferMintAuthorities } },
     1 +
-      (() => {
-        switch (Object.keys(config.communityVoteThreshold)[0]) {
-          case "yesVotePercentage":
-            return 1 + 1;
-          case "quorumPercentage":
-            return 1 + 1;
-          case "disabled":
-            return 1;
-          default:
-            return 0;
-        }
-      })() +
-      8 +
-      4 +
-      4 +
-      (() => {
-        switch (Object.keys(config.voteTipping)[0]) {
-          case "strict":
-            return 1;
-          case "early":
-            return 1;
-          case "disabled":
-            return 1;
-          default:
-            return 0;
-        }
-      })() +
-      (() => {
-        switch (Object.keys(config.councilVoteThreshold)[0]) {
-          case "yesVotePercentage":
-            return 1 + 1;
-          case "quorumPercentage":
-            return 1 + 1;
-          case "disabled":
-            return 1;
-          default:
-            return 0;
-        }
-      })() +
-      (() => {
-        switch (Object.keys(config.councilVetoVoteThreshold)[0]) {
-          case "yesVotePercentage":
-            return 1 + 1;
-          case "quorumPercentage":
-            return 1 + 1;
-          case "disabled":
-            return 1;
-          default:
-            return 0;
-        }
-      })() +
-      8 +
-      1
+      getSpanOfVoteThreshold(config.communityVoteThreshold) +
+      B.u64("minCommunityWeightToCreateProposal").span +
+      B.u32("minTransactionHoldUpTime").span +
+      B.u32("votingBaseTime").span +
+      getSpanOfVoteTipping(config.communityVoteTipping) +
+      getSpanOfVoteThreshold(config.councilVoteThreshold) +
+      getSpanOfVoteThreshold(config.councilVetoVoteThreshold) +
+      B.u64("minCouncilWeightToCreateProposal").span +
+      getSpanOfVoteTipping(config.councilVoteTipping) +
+      getSpanOfVoteThreshold(config.communityVetoVoteThreshold) +
+      B.u32("votingCoolOffTime").span +
+      B.u8("depositExemptProposalCount").span +
+      1 // transferMintAuthorities: bool
   );
 }
 
@@ -634,6 +629,45 @@ const createGoverningTokenConfigArgsStruct = (p: string) =>
     p
   );
 
+// Maps to VoteThreshold defined enum type.
+const createVoteThresholdUnion = (p: string) => {
+  const U = B.union(B.u8("discriminator"), null, p);
+  U.addVariant(0, B.u8(), "yesVotePercentage");
+  U.addVariant(1, B.u8(), "quorumPercentage");
+  U.addVariant(2, B.struct([]), "disabled");
+  return U;
+};
+
+// Maps to VoteTipping defined enum type.
+const createVoteTippingUnion = (p: string) => {
+  const U = B.union(B.u8("discriminator"), null, p);
+  U.addVariant(0, B.struct([]), "strict");
+  U.addVariant(1, B.struct([]), "early");
+  U.addVariant(2, B.struct([]), "disabled");
+  return U;
+};
+
+// Maps to GovernanceConfig defined struct.
+const createGovernanceConfigStruct = (p: string) => {
+  return B.struct(
+    [
+      createVoteThresholdUnion("communityVoteThreshold"),
+      B.u64("minCommunityWeightToCreateProposal"),
+      B.u32("minTransactionHoldUpTime"),
+      B.u32("votingBaseTime"),
+      createVoteTippingUnion("communityVoteTipping"),
+      createVoteThresholdUnion("councilVoteThreshold"),
+      createVoteThresholdUnion("councilVetoVoteThreshold"),
+      B.u64("minCouncilWeightToCreateProposal"),
+      createVoteTippingUnion("councilVoteTipping"),
+      createVoteThresholdUnion("communityVetoVoteThreshold"),
+      B.u32("votingCoolOffTime"),
+      B.u8("depositExemptProposalCount"),
+    ],
+    p
+  );
+};
+
 const LAYOUT = B.union(B.u8("instruction"));
 LAYOUT.addVariant(
   0,
@@ -820,43 +854,7 @@ LAYOUT.addVariant(16, B.struct([]), "executeTransaction");
 LAYOUT.addVariant(
   17,
   B.struct([
-    B.struct(
-      [
-        ((p: string) => {
-          const U = B.union(B.u8("discriminator"), null, p);
-          U.addVariant(0, B.u8(), "yesVotePercentage");
-          U.addVariant(1, B.u8(), "quorumPercentage");
-          U.addVariant(2, B.struct([]), "disabled");
-          return U;
-        })("communityVoteThreshold"),
-        B.u64("minCommunityWeightToCreateProposal"),
-        B.u32("minTransactionHoldUpTime"),
-        B.u32("maxVotingTime"),
-        ((p: string) => {
-          const U = B.union(B.u8("discriminator"), null, p);
-          U.addVariant(0, B.struct([]), "strict");
-          U.addVariant(1, B.struct([]), "early");
-          U.addVariant(2, B.struct([]), "disabled");
-          return U;
-        })("voteTipping"),
-        ((p: string) => {
-          const U = B.union(B.u8("discriminator"), null, p);
-          U.addVariant(0, B.u8(), "yesVotePercentage");
-          U.addVariant(1, B.u8(), "quorumPercentage");
-          U.addVariant(2, B.struct([]), "disabled");
-          return U;
-        })("councilVoteThreshold"),
-        ((p: string) => {
-          const U = B.union(B.u8("discriminator"), null, p);
-          U.addVariant(0, B.u8(), "yesVotePercentage");
-          U.addVariant(1, B.u8(), "quorumPercentage");
-          U.addVariant(2, B.struct([]), "disabled");
-          return U;
-        })("councilVetoVoteThreshold"),
-        B.u64("minCouncilWeightToCreateProposal"),
-      ],
-      "config"
-    ),
+    createGovernanceConfigStruct("config"),
     B.bool("transferMintAuthorities"),
   ]),
   "createMintGovernance"

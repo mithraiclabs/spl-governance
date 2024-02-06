@@ -95,13 +95,6 @@ export const createProposalTx = async (
     [Buffer.from("realm-config"), new web3.PublicKey(realmKey).toBuffer()],
     GOVERNANCE_PROGRAM_ID
   );
-  const [proposalDepositAddress] = web3.PublicKey.findProgramAddressSync(
-    [
-      proposalAddress.toBuffer(),
-      governanceProgram.provider.publicKey.toBuffer(),
-    ],
-    GOVERNANCE_PROGRAM_ID
-  );
 
   const tx = await governanceProgram.methods
     .createProposal(
@@ -124,7 +117,6 @@ export const createProposalTx = async (
       governingTokenMint,
       systemProgram: web3.SystemProgram.programId,
       realmConfigAddress,
-      proposalDepositAddress,
     })
     .transaction();
 
@@ -231,7 +223,7 @@ export const createProposalWithInstructionsTransactions = async (
   governanceKey: Address,
   proposalName: string,
   instructions: web3.TransactionInstruction[],
-  councilVote = false,
+  councilVote = false
 ) => {
   const realm = await governanceProgram.account.realmV2.fetch(realmKey);
   if (!realm) {
@@ -310,7 +302,6 @@ export const createProposalWithInstructionsTransactions = async (
         governingTokenMint,
         systemProgram: web3.SystemProgram.programId,
         realmConfigAddress,
-        proposalDepositAddress,
       })
       .transaction(),
     // TX 2: Insert the instructions TX to the proposal

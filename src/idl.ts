@@ -337,12 +337,6 @@ type SplGovernance = {
           isMut: false;
           isSigner: false;
         },
-        // NOTE: this IDL doesn not include `VoterWeightRecord` or `MaxVoterWeightRecord` accounts.
-        {
-          name: "proposalDepositAddress";
-          isMut: true;
-          isSigner: false;
-        }
       ];
       args: [
         {
@@ -2053,11 +2047,11 @@ type SplGovernance = {
             type: "u32";
           },
           {
-            name: "maxVotingTime";
+            name: "votingBaseTime";
             type: "u32";
           },
           {
-            name: "voteTipping";
+            name: "communityVoteTipping";
             type: {
               defined: "VoteTipping";
             };
@@ -2077,6 +2071,26 @@ type SplGovernance = {
           {
             name: "minCouncilWeightToCreateProposal";
             type: "u64";
+          },
+          {
+            name: "councilVoteTipping";
+            type: {
+              defined: "VoteTipping";
+            };
+          },
+          {
+            name: "communityVetoVoteThreshold";
+            type: {
+              defined: "VoteThreshold";
+            };
+          },
+          {
+            name: "votingCoolOffTime";
+            type: "u32";
+          },
+          {
+            name: "depositExemptProposalCount";
+            type: "u8";
           }
         ];
       };
@@ -3358,12 +3372,6 @@ export const SPL_GOVERNANCE_IDL: SplGovernance = {
         {
           name: "realmConfigAddress",
           isMut: false,
-          isSigner: false,
-        },
-        // NOTE: this IDL doesn not include `VoterWeightRecord` or `MaxVoterWeightRecord` accounts.
-        {
-          name: "proposalDepositAddress",
-          isMut: true,
           isSigner: false,
         },
       ],
@@ -5076,11 +5084,11 @@ export const SPL_GOVERNANCE_IDL: SplGovernance = {
             type: "u32",
           },
           {
-            name: "maxVotingTime",
+            name: "votingBaseTime",
             type: "u32",
           },
           {
-            name: "voteTipping",
+            name: "communityVoteTipping",
             type: {
               defined: "VoteTipping",
             },
@@ -5100,6 +5108,26 @@ export const SPL_GOVERNANCE_IDL: SplGovernance = {
           {
             name: "minCouncilWeightToCreateProposal",
             type: "u64",
+          },
+          {
+            name: "councilVoteTipping",
+            type: {
+              defined: "VoteTipping",
+            },
+          },
+          {
+            name: "communityVetoVoteThreshold",
+            type: {
+              defined: "VoteThreshold",
+            },
+          },
+          {
+            name: "votingCoolOffTime",
+            type: "u32",
+          },
+          {
+            name: "depositExemptProposalCount",
+            type: "u8",
           },
         ],
       },
