@@ -377,7 +377,8 @@ function encodeCastVote({ vote }: any): Buffer {
       (() => {
         switch (Object.keys(vote)[0]) {
           case "approve":
-            return 1 + 4 + vote.length * 2;
+            // Vec uses u32 (aka span = 4) for length
+            return 1 + 4 + vote.approve.length * 2;
           case "deny":
             return 1;
           case "abstain":
