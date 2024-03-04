@@ -96,6 +96,14 @@ export const createProposalTx = async (
     GOVERNANCE_PROGRAM_ID
   );
 
+  try {
+    await governanceProgram.account.tokenOwnerRecordV2.fetch(
+      proposalOwnerRecordKey
+    );
+  } catch {
+    throw new Error("No TokenOwnerRecord found");
+  }
+
   const tx = await governanceProgram.methods
     .createProposal(
       proposalName,
