@@ -80,7 +80,7 @@ export const createProposalTx = async (
       governingTokenMint.toBuffer(),
       proposalSeed.toBuffer(),
     ],
-    GOVERNANCE_PROGRAM_ID
+    governanceProgram.programId
   );
   const [proposalOwnerRecordKey] = web3.PublicKey.findProgramAddressSync(
     [
@@ -89,11 +89,11 @@ export const createProposalTx = async (
       governingTokenMint.toBuffer(),
       governanceProgram.provider.publicKey.toBuffer(),
     ],
-    GOVERNANCE_PROGRAM_ID
+    governanceProgram.programId
   );
   const [realmConfigAddress] = web3.PublicKey.findProgramAddressSync(
     [Buffer.from("realm-config"), new web3.PublicKey(realmKey).toBuffer()],
-    GOVERNANCE_PROGRAM_ID
+    governanceProgram.programId
   );
 
   try {
@@ -167,7 +167,7 @@ export const insertTransactionTx = async (
       new BN(optionIndex).toArrayLike(Buffer, "le", 1),
       new BN(txIndex).toArrayLike(Buffer, "le", 2),
     ],
-    GOVERNANCE_PROGRAM_ID
+    governanceProgram.programId
   );
 
   return governanceProgram.methods
@@ -248,7 +248,7 @@ export const createProposalWithInstructionsTransactions = async (
       governingTokenMint.toBuffer(),
       proposalSeed.toBuffer(),
     ],
-    GOVERNANCE_PROGRAM_ID
+    governanceProgram.programId
   );
   const [proposalOwnerRecordKey] = web3.PublicKey.findProgramAddressSync(
     [
@@ -257,18 +257,18 @@ export const createProposalWithInstructionsTransactions = async (
       governingTokenMint.toBuffer(),
       governanceProgram.provider.publicKey.toBuffer(),
     ],
-    GOVERNANCE_PROGRAM_ID
+    governanceProgram.programId
   );
   const [realmConfigAddress] = web3.PublicKey.findProgramAddressSync(
     [Buffer.from("realm-config"), new web3.PublicKey(realmKey).toBuffer()],
-    GOVERNANCE_PROGRAM_ID
+    governanceProgram.programId
   );
   const [proposalDepositAddress] = web3.PublicKey.findProgramAddressSync(
     [
       proposalAddress.toBuffer(),
       governanceProgram.provider.publicKey.toBuffer(),
     ],
-    GOVERNANCE_PROGRAM_ID
+    governanceProgram.programId
   );
 
   const optionIndex = 0;
@@ -284,7 +284,7 @@ export const createProposalWithInstructionsTransactions = async (
       new BN(optionIndex).toArrayLike(Buffer, "le", 1),
       new BN(txIndex).toArrayLike(Buffer, "le", 2),
     ],
-    GOVERNANCE_PROGRAM_ID
+    governanceProgram.programId
   );
 
   return Promise.all([
